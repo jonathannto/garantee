@@ -7,7 +7,13 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import br.eng.jonathan.garantee.api.exception.NotFoundException;
+import org.flywaydb.core.api.resource.Resource;
+import org.hibernate.ObjectNotFoundException;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,6 +54,17 @@ public class CategoriaController {
 			.buildAndExpand(categoriaSalva.getCodigoCategoria()).toUri();
 
 		 return ResponseEntity.created(uri).body(categoriaSalva);
+	}
+
+	@PutMapping("/{codigoCategoria}")
+	public ResponseEntity<Categoria> atualizar(@PathVariable Long codigoCategoria, @Valid @RequestBody Categoria categoria) throws NotFoundException {
+
+		Categoria categoriaSalva = repository.findById(codigoCategoria).orElseThrow(() -> new NotFoundException("categoria não encontrada."));
+		BeanUtils.copyProperties(categoria, categoriaSalva, "codigoCategoria");
+
+		repository.save(categoriaSalva);
+
+		return ResponseEntity.ok(categoriaSalva);
 	}
 
 	@DeleteMapping("/{codigoCategoria}")
