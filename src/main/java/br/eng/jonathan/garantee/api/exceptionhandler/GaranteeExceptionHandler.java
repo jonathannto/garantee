@@ -41,23 +41,23 @@ public class GaranteeExceptionHandler extends ResponseEntityExceptionHandler {
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 
-		List<MensagemErro> erros = criarListaDeErros(ex.getBindingResult());
+		List<MensagemErro> errors = criarListaDeErros(ex.getBindingResult());
 
-		return handleExceptionInternal(ex, erros, headers, HttpStatus.BAD_REQUEST, request);
+		return handleExceptionInternal(ex, errors, headers, HttpStatus.BAD_REQUEST, request);
 	}
 
 	private List<MensagemErro> criarListaDeErros(BindingResult bindingResult) {
 
-		List<MensagemErro> erros = new ArrayList<>();
+		List<MensagemErro> errors = new ArrayList<>();
 		
 		for (FieldError fieldError : bindingResult.getFieldErrors()) {
-			String mensagemUsuario = messageSource.getMessage(fieldError, LocaleContextHolder.getLocale());
-			String mensagemDesenvolvedor = fieldError.toString();
+			String mensagensUsuario = messageSource.getMessage(fieldError, LocaleContextHolder.getLocale());
+			String mensagensDesenvolvedor = fieldError.toString();
 			
-			erros.add(new MensagemErro(mensagemUsuario, mensagemDesenvolvedor));
+			errors.add(new MensagemErro(mensagensUsuario, mensagensDesenvolvedor));
 		}
 		
-		return erros;
+		return errors;
 	}
 
 }
