@@ -7,9 +7,7 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import br.eng.jonathan.garantee.api.event.RecursoCriadoEvent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,9 +23,6 @@ public class CategoriaController {
 	@Autowired
 	private CategoriaRepository repository;
 
-	@Autowired
-	private ApplicationEventPublisher publisher;
-
 	@GetMapping
 	public List<Categoria> listar() {
 
@@ -38,7 +33,7 @@ public class CategoriaController {
 	@GetMapping("/{codigoCategoria}")
 	public ResponseEntity<Optional<Categoria>> buscarPorCodigo(@PathVariable Long codigoCategoria) {
 
-			var categoria = repository.findById(codigoCategoria);
+		var categoria = repository.findById(codigoCategoria);
 
 		return categoria.isPresent() ? ResponseEntity.ok(categoria) : ResponseEntity.notFound().build();
 
@@ -47,10 +42,17 @@ public class CategoriaController {
 	@PostMapping
 	public ResponseEntity<Categoria> criar(@Valid @RequestBody Categoria categoria, HttpServletResponse response) {
 
-			Categoria categoriaSalva = repository.save(categoria);
+		Categoria categoriaSalva = repository.save(categoria);
 
-			publisher.publishEvent(new RecursoCriadoEvent(this, response, categoria.getCodigoCategoria()));
+		 URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{codigoCategoria}")
+			.buildAndExpand(categoriaSalva.getCodigoCategoria()).toUri();
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(categoriaSalva);
+		 return ResponseEntity.created(uri).body(categoriaSalva);
+	}
+
+	@DeleteMapping("/{codigoCategoria}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void remover(@PathVariable Long codigoCategoria){
+		repository.deleteById(codigoCategoria);
 	}
 }
