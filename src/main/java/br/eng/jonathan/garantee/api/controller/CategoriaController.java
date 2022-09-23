@@ -7,9 +7,13 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import br.eng.jonathan.garantee.api.event.RecursoCriadoEvent;
+import br.eng.jonathan.garantee.api.exception.NotFoundException;
+import org.flywaydb.core.api.resource.Resource;
+import org.hibernate.ObjectNotFoundException;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,9 +29,6 @@ public class CategoriaController {
 	@Autowired
 	private CategoriaRepository repository;
 
-	@Autowired
-	private ApplicationEventPublisher publisher;
-
 	@GetMapping
 	public List<Categoria> listar() {
 
@@ -38,7 +39,7 @@ public class CategoriaController {
 	@GetMapping("/{codigoCategoria}")
 	public ResponseEntity<Optional<Categoria>> buscarPorCodigo(@PathVariable Long codigoCategoria) {
 
-			var categoria = repository.findById(codigoCategoria);
+		var categoria = repository.findById(codigoCategoria);
 
 		return categoria.isPresent() ? ResponseEntity.ok(categoria) : ResponseEntity.notFound().build();
 
@@ -47,10 +48,28 @@ public class CategoriaController {
 	@PostMapping
 	public ResponseEntity<Categoria> criar(@Valid @RequestBody Categoria categoria, HttpServletResponse response) {
 
-			Categoria categoriaSalva = repository.save(categoria);
+		Categoria categoriaSalva = repository.save(categoria);
 
-			publisher.publishEvent(new RecursoCriadoEvent(this, response, categoria.getCodigoCategoria()));
+		 URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{codigoCategoria}")
+			.buildAndExpand(categoriaSalva.getCodigoCategoria()).toUri();
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(categoriaSalva);
+		 return ResponseEntity.created(uri).body(categoriaSalva);
+	}
+
+	@PutMapping("/{codigoCategoria}")
+	public ResponseEntity<Categoria> atualizar(@PathVariable Long codigoCategoria, @Valid @RequestBody Categoria categoria) throws NotFoundException {
+
+		Categoria categoriaSalva = repository.findById(codigoCategoria).orElseThrow(() -> new NotFoundException("categoria não encontrada."));
+		BeanUtils.copyProperties(categoria, categoriaSalva, "codigoCategoria");
+
+		repository.save(categoriaSalva);
+
+		return ResponseEntity.ok(categoriaSalva);
+	}
+
+	@DeleteMapping("/{codigoCategoria}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void remover(@PathVariable Long codigoCategoria){
+		repository.deleteById(codigoCategoria);
 	}
 }
