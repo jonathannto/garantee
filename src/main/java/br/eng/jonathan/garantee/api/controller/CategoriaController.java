@@ -8,12 +8,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import br.eng.jonathan.garantee.api.exception.NotFoundException;
-import org.flywaydb.core.api.resource.Resource;
-import org.hibernate.ObjectNotFoundException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
-import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +24,11 @@ import br.eng.jonathan.garantee.api.repository.CategoriaRepository;
 @RequestMapping(value = "/categorias", produces = "application/json")
 public class CategoriaController {
 
+	private static final String CATEGORIA_BUSCA_CATEGORIA_ERRO = "CATEGORIA.BUSCA_CATEGORIA_ERRO";
+
+	@Autowired
+	private MessageSource messageSource;
+
 	@Autowired
 	private CategoriaRepository repository;
 
@@ -37,16 +40,16 @@ public class CategoriaController {
 	}
 
 	@GetMapping("/{codigoCategoria}")
-	public ResponseEntity<Optional<Categoria>> buscarPorCodigo(@PathVariable Long codigoCategoria) {
+	public ResponseEntity<Optional<Categoria>> buscarPorCodigoCategoria(@PathVariable Long codigoCategoria) {
 
 		var categoria = repository.findById(codigoCategoria);
 
-		return categoria.isPresent() ? ResponseEntity.ok(categoria) : ResponseEntity.notFound().build();
+		return ResponseEntity.ok(categoria);
 
 	}
 
 	@PostMapping
-	public ResponseEntity<Categoria> criar(@Valid @RequestBody Categoria categoria, HttpServletResponse response) {
+	public ResponseEntity<Categoria> criarCategoria(@Valid @RequestBody Categoria categoria, HttpServletResponse response) {
 
 		Categoria categoriaSalva = repository.save(categoria);
 
@@ -57,9 +60,9 @@ public class CategoriaController {
 	}
 
 	@PutMapping("/{codigoCategoria}")
-	public ResponseEntity<Categoria> atualizar(@PathVariable Long codigoCategoria, @Valid @RequestBody Categoria categoria) throws NotFoundException {
+	public ResponseEntity<Categoria> atualizarCategoria(@PathVariable Long codigoCategoria, @Valid @RequestBody Categoria categoria) throws NotFoundException {
 
-		Categoria categoriaSalva = repository.findById(codigoCategoria).orElseThrow(() -> new NotFoundException("categoria não encontrada."));
+		Categoria categoriaSalva = repository.findById(codigoCategoria).orElseThrow(() -> new NotFoundException(getMessageErro(CATEGORIA_BUSCA_CATEGORIA_ERRO)));
 		BeanUtils.copyProperties(categoria, categoriaSalva, "codigoCategoria");
 
 		repository.save(categoriaSalva);
@@ -69,7 +72,14 @@ public class CategoriaController {
 
 	@DeleteMapping("/{codigoCategoria}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void remover(@PathVariable Long codigoCategoria){
+	public void deletarCategoria(@PathVariable Long codigoCategoria){
+
 		repository.deleteById(codigoCategoria);
+
 	}
+
+	private String getMessageErro(String mensagem) {
+		return messageSource.getMessage(mensagem, null, LocaleContextHolder.getLocale());
+	}
+
 }

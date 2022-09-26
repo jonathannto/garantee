@@ -28,12 +28,12 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("Garantee - APIs")
-                .description("\"Sistema de controle de estoque e garantia de produtos eletronicos\"")
+                .title("Bitnick - APIs")
+                .description("\"Sistema de pagamentos - Alpha release\"")
                 .version("1.0.0")
                 .license("Apache License Version 2.0")
                 .licenseUrl("https://www.apache.org/licenses/LICENSE-2.0\"")
-                .contact(new Contact("Jonathan Nascimento", "http://jonathan.eng.br", "nascimento.jonathan@live.com"))
+                .contact(new Contact("BSS", "http://jonathan.eng.br", "nascimento.jonathan@live.com"))
                 .build();
     }
 
