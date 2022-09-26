@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import br.eng.jonathan.garantee.api.exception.NotFoundException;
 import br.eng.jonathan.garantee.api.model.Categoria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -67,6 +68,17 @@ public class GaranteeExceptionHandler extends ResponseEntityExceptionHandler {
 	public ResponseEntity<Object> handleEmptyResultDataAccessException(EmptyResultDataAccessException ex, WebRequest request){
 
 		String mensagensUsuario = messageSource.getMessage("recurso.nao_encontrado", null, LocaleContextHolder.getLocale());
+		String mensagensDesenvolvedor = ex.toString();
+
+		List<MensagemErro> errors = Arrays.asList(new MensagemErro(mensagensUsuario, mensagensDesenvolvedor));
+
+		return handleExceptionInternal(ex, errors, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+	}
+
+	@ExceptionHandler(NotFoundException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public ResponseEntity<Object> notFoundException(NotFoundException ex, WebRequest request) {
+		String mensagensUsuario = ex.getMessage().toString();
 		String mensagensDesenvolvedor = ex.toString();
 
 		List<MensagemErro> errors = Arrays.asList(new MensagemErro(mensagensUsuario, mensagensDesenvolvedor));
