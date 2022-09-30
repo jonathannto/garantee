@@ -2,84 +2,83 @@ package br.eng.jonathan.garantee.api.controller;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
+
+import br.eng.jonathan.garantee.api.controller.open_api.CategoriaControllerOpenApi;
+import br.eng.jonathan.garantee.api.model.dto.CategoriaDTO;
+import br.eng.jonathan.garantee.api.exception.NotFoundException;
+import br.eng.jonathan.garantee.api.service.CategoriaService;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import br.eng.jonathan.garantee.api.model.Categoria;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import br.eng.jonathan.garantee.api.exception.NotFoundException;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import br.eng.jonathan.garantee.api.model.Categoria;
-import br.eng.jonathan.garantee.api.repository.CategoriaRepository;
-
 @RestController
 @RequestMapping(value = "/categorias", produces = "application/json")
-public class CategoriaController {
-
-	private static final String CATEGORIA_BUSCA_CATEGORIA_ERRO = "CATEGORIA.BUSCA_CATEGORIA_ERRO";
+public class CategoriaController implements CategoriaControllerOpenApi {
 
 	@Autowired
-	private MessageSource messageSource;
+	private CategoriaService service;
 
 	@Autowired
-	private CategoriaRepository repository;
+	private ModelMapper modelMapper;
 
 	@GetMapping
-	public List<Categoria> listar() {
+	public ResponseEntity<List<CategoriaDTO>> listar() {
 
-		return repository.findAll();
+		List<Categoria> categorias = service.listar();
+
+		return ResponseEntity.ok(categorias.stream()
+				.map(categoria -> modelMapper.map(categoria, CategoriaDTO.class))
+				.collect(Collectors.toList()));
 
 	}
 
 	@GetMapping("/{codigoCategoria}")
-	public ResponseEntity<Optional<Categoria>> buscarPorCodigoCategoria(@PathVariable Long codigoCategoria) {
+	public ResponseEntity<CategoriaDTO> buscarPorCategoria (@PathVariable Long codigoCategoria) throws NotFoundException {
 
-		var categoria = repository.findById(codigoCategoria);
+		var categoria = service.buscarPorCodigoCategoria(codigoCategoria);
 
-		return ResponseEntity.ok(categoria);
+		return ResponseEntity.ok()
+				.body(modelMapper.map(categoria, CategoriaDTO.class));
 
 	}
 
 	@PostMapping
-	public ResponseEntity<Categoria> criarCategoria(@Valid @RequestBody Categoria categoria, HttpServletResponse response) {
+	public ResponseEntity<CategoriaDTO> criarCategoria(@Valid @RequestBody CategoriaDTO categoriaDTO, HttpServletResponse response) {
 
-		Categoria categoriaSalva = repository.save(categoria);
+		Categoria categoria = modelMapper.map(categoriaDTO, Categoria.class);
+		var categoriaSalva = service.criarCategoria(categoria);
 
-		 URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{codigoCategoria}")
-			.buildAndExpand(categoriaSalva.getCodigoCategoria()).toUri();
+		URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{codigoCategoria}")
+				.buildAndExpand(categoriaSalva.getCodigoCategoria()).toUri();
 
-		 return ResponseEntity.created(uri).body(categoriaSalva);
+		return ResponseEntity.created(uri).body(modelMapper.map(categoriaSalva, CategoriaDTO.class));
+
 	}
 
 	@PutMapping("/{codigoCategoria}")
-	public ResponseEntity<Categoria> atualizarCategoria(@PathVariable Long codigoCategoria, @Valid @RequestBody Categoria categoria) throws NotFoundException {
+	public ResponseEntity<CategoriaDTO> atualizarCategoria(@PathVariable Long codigoCategoria, @Valid @RequestBody CategoriaDTO categoriaDTO) throws NotFoundException {
 
-		Categoria categoriaSalva = repository.findById(codigoCategoria).orElseThrow(() -> new NotFoundException(getMessageErro(CATEGORIA_BUSCA_CATEGORIA_ERRO)));
-		BeanUtils.copyProperties(categoria, categoriaSalva, "codigoCategoria");
+		Categoria categoria = modelMapper.map(categoriaDTO, Categoria.class);
+		Categoria categoriaSalva = service.atualizarCategoria(codigoCategoria, categoria);
 
-		repository.save(categoriaSalva);
-
-		return ResponseEntity.ok(categoriaSalva);
+		return ResponseEntity.ok(modelMapper.map(categoriaSalva, CategoriaDTO.class));
 	}
 
 	@DeleteMapping("/{codigoCategoria}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void deletarCategoria(@PathVariable Long codigoCategoria){
 
-		repository.deleteById(codigoCategoria);
+		service.deletarCategoria(codigoCategoria);
 
-	}
-
-	private String getMessageErro(String mensagem) {
-		return messageSource.getMessage(mensagem, null, LocaleContextHolder.getLocale());
 	}
 
 }
