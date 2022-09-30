@@ -40,6 +40,7 @@ public class GaranteeExceptionHandler extends ResponseEntityExceptionHandler {
 		return handleExceptionInternal(ex, erros, headers, HttpStatus.BAD_REQUEST, request);
 	}
 
+
 	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
@@ -47,7 +48,10 @@ public class GaranteeExceptionHandler extends ResponseEntityExceptionHandler {
 		List<MensagemErro> errors = criarListaDeErros(ex.getBindingResult());
 
 		return handleExceptionInternal(ex, errors, headers, HttpStatus.BAD_REQUEST, request);
+
 	}
+
+
 
 	private List<MensagemErro> criarListaDeErros(BindingResult bindingResult) {
 
