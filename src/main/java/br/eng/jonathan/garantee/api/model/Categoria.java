@@ -1,8 +1,7 @@
 package br.eng.jonathan.garantee.api.model;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -21,11 +20,10 @@ public class Categoria {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "codigoCategoria")
+	@Column(name = "codigo_categoria")
 	private Long codigoCategoria;
 	
-	@NotNull
-	@Size(min=3, max=45)
+
 	@Column(name = "nome")
 	private String nome;
 	

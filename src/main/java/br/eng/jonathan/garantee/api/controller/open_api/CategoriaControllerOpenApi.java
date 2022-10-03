@@ -1,13 +1,15 @@
 package br.eng.jonathan.garantee.api.controller.open_api;
 
 import br.eng.jonathan.garantee.api.exception.NotFoundException;
-import br.eng.jonathan.garantee.api.model.dto.CategoriaDTO;
+import br.eng.jonathan.garantee.api.dto.CategoriaDTO;
+import br.eng.jonathan.garantee.api.model.Categoria;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 import java.util.List;
 
 @Api(tags = "Categoria", description = "Implementa as APIs para controle e cadastros de categoria")
@@ -20,7 +22,8 @@ public interface CategoriaControllerOpenApi {
     public ResponseEntity<CategoriaDTO> buscarPorCategoria (@PathVariable Long codigoCategoria) throws NotFoundException;
 
     @ApiOperation(value = "Cria uma nova categoria", notes = "Realiza o cadastramento de uma nova categoria dentro do sistema")
-    public ResponseEntity<CategoriaDTO> criarCategoria(CategoriaDTO categoriaDTO, HttpServletResponse response);
+    //public ResponseEntity<Categoria> criarCategoria(@Valid @RequestBody Categoria categoriaDTO, HttpServletResponse response);
+    public ResponseEntity<CategoriaDTO> criarCategoria(@Valid @RequestBody CategoriaDTO categoriaDTO, HttpServletResponse response);
 
     @ApiOperation(value = "Atualiza uma categoria específica", notes = "Realiza a atualização de uma categoria dentro do sistema")
     public ResponseEntity<CategoriaDTO> atualizarCategoria(Long codigoCategoria, CategoriaDTO categoriaDTO) throws NotFoundException;

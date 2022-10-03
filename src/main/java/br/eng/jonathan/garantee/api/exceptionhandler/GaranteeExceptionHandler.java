@@ -14,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -40,8 +41,6 @@ public class GaranteeExceptionHandler extends ResponseEntityExceptionHandler {
 		return handleExceptionInternal(ex, erros, headers, HttpStatus.BAD_REQUEST, request);
 	}
 
-
-	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 
@@ -50,8 +49,6 @@ public class GaranteeExceptionHandler extends ResponseEntityExceptionHandler {
 		return handleExceptionInternal(ex, errors, headers, HttpStatus.BAD_REQUEST, request);
 
 	}
-
-
 
 	private List<MensagemErro> criarListaDeErros(BindingResult bindingResult) {
 

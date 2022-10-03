@@ -5,13 +5,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import br.eng.jonathan.garantee.api.controller.open_api.CategoriaControllerOpenApi;
-import br.eng.jonathan.garantee.api.model.dto.CategoriaDTO;
+import br.eng.jonathan.garantee.api.dto.CategoriaDTO;
 import br.eng.jonathan.garantee.api.exception.NotFoundException;
 import br.eng.jonathan.garantee.api.service.CategoriaService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import br.eng.jonathan.garantee.api.model.Categoria;
@@ -61,6 +62,7 @@ public class CategoriaController implements CategoriaControllerOpenApi {
 				.buildAndExpand(categoriaSalva.getCodigoCategoria()).toUri();
 
 		return ResponseEntity.created(uri).body(modelMapper.map(categoriaSalva, CategoriaDTO.class));
+		//return ResponseEntity.created(uri).body(categoriaSalva);
 
 	}
 
