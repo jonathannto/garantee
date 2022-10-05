@@ -12,7 +12,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import br.eng.jonathan.garantee.api.model.Categoria;
@@ -53,21 +52,20 @@ public class CategoriaController implements CategoriaControllerOpenApi {
 	}
 
 	@PostMapping
-	public ResponseEntity<CategoriaDTO> criarCategoria(@Valid @RequestBody CategoriaDTO categoriaDTO, HttpServletResponse response) {
+	public ResponseEntity<CategoriaDTO> criarCategoria(@RequestBody CategoriaDTO categoriaDTO, HttpServletResponse response) throws NotFoundException {
 
-		Categoria categoria = modelMapper.map(categoriaDTO, Categoria.class);
-		var categoriaSalva = service.criarCategoria(categoria);
+		var categoriaSalva = service.criarCategoria(categoriaDTO);
 
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{codigoCategoria}")
 				.buildAndExpand(categoriaSalva.getCodigoCategoria()).toUri();
 
 		return ResponseEntity.created(uri).body(modelMapper.map(categoriaSalva, CategoriaDTO.class));
-		//return ResponseEntity.created(uri).body(categoriaSalva);
+
 
 	}
 
 	@PutMapping("/{codigoCategoria}")
-	public ResponseEntity<CategoriaDTO> atualizarCategoria(@PathVariable Long codigoCategoria, @Valid @RequestBody CategoriaDTO categoriaDTO) throws NotFoundException {
+	public ResponseEntity<CategoriaDTO> atualizarCategoria(@PathVariable Long codigoCategoria, @Valid @RequestBody CategoriaDTO categoriaDTO) {
 
 		Categoria categoria = modelMapper.map(categoriaDTO, Categoria.class);
 		Categoria categoriaSalva = service.atualizarCategoria(codigoCategoria, categoria);

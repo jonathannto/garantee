@@ -22,8 +22,10 @@ public class Categoria {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "codigo_categoria")
 	private Long codigoCategoria;
-	
 
+	@NotNull
+	@NotBlank
+	@Size(min = 3, max = 45)
 	@Column(name = "nome")
 	private String nome;
 	

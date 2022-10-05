@@ -1,5 +1,7 @@
 package br.eng.jonathan.garantee.api.service;
 
+import br.eng.jonathan.garantee.api.dto.CategoriaDTO;
+import br.eng.jonathan.garantee.api.dto.assembler.CategoriaDTOAssembler;
 import br.eng.jonathan.garantee.api.exception.NotFoundException;
 import br.eng.jonathan.garantee.api.model.Categoria;
 import br.eng.jonathan.garantee.api.repository.CategoriaRepository;
@@ -7,16 +9,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.transaction.Transactional;
-import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CategoriaService {
@@ -28,6 +24,9 @@ public class CategoriaService {
 
     @Autowired
     private CategoriaRepository repository;
+
+    @Autowired
+    private CategoriaDTOAssembler assemblerDTO;
 
     @GetMapping
     public List<Categoria> listar() {
@@ -44,14 +43,15 @@ public class CategoriaService {
 
     }
 
-    public Categoria criarCategoria(Categoria categoria) {
+    public CategoriaDTO criarCategoria(CategoriaDTO categoriaDTO) throws NotFoundException {
 
-        Categoria categoriaSalva = repository.save(categoria);
-        return categoriaSalva;
+        Categoria categoriaSalva = repository.save(assemblerDTO.converterParaEntidade(categoriaDTO));
+
+        return assemblerDTO.converterParaDTO(categoriaSalva);
 
     }
 
-    public Categoria atualizarCategoria(Long codigoCategoria, Categoria categoria) throws NotFoundException {
+    public Categoria atualizarCategoria(Long codigoCategoria, Categoria categoria) {
 
         Categoria categoriaSalva = repository.findById(codigoCategoria).orElseThrow(() -> new NotFoundException(getMessageErro(CATEGORIA_BUSCA_CATEGORIA_ERRO)));
         BeanUtils.copyProperties(categoria, categoriaSalva, "codigoCategoria");
