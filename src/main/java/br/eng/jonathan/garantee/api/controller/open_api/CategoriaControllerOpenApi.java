@@ -23,7 +23,7 @@ public interface CategoriaControllerOpenApi {
 
     @ApiOperation(value = "Cria uma nova categoria", notes = "Realiza o cadastramento de uma nova categoria dentro do sistema")
     //public ResponseEntity<Categoria> criarCategoria(@Valid @RequestBody Categoria categoriaDTO, HttpServletResponse response);
-    public ResponseEntity<CategoriaDTO> criarCategoria(@Valid @RequestBody CategoriaDTO categoriaDTO, HttpServletResponse response);
+    public ResponseEntity<CategoriaDTO> criarCategoria(@Valid @RequestBody CategoriaDTO categoriaDTO, HttpServletResponse response) throws NotFoundException;
 
     @ApiOperation(value = "Atualiza uma categoria específica", notes = "Realiza a atualização de uma categoria dentro do sistema")
     public ResponseEntity<CategoriaDTO> atualizarCategoria(Long codigoCategoria, CategoriaDTO categoriaDTO) throws NotFoundException;

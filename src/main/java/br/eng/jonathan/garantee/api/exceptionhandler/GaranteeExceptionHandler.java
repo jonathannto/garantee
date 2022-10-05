@@ -3,9 +3,10 @@ package br.eng.jonathan.garantee.api.exceptionhandler;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import br.eng.jonathan.garantee.api.exception.NotFoundException;
-import br.eng.jonathan.garantee.api.model.Categoria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -14,13 +15,15 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.transaction.TransactionSystemException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 
 @ControllerAdvice
 public class GaranteeExceptionHandler extends ResponseEntityExceptionHandler {
@@ -85,6 +88,19 @@ public class GaranteeExceptionHandler extends ResponseEntityExceptionHandler {
 		List<MensagemErro> errors = Arrays.asList(new MensagemErro(mensagensUsuario, mensagensDesenvolvedor));
 
 		return handleExceptionInternal(ex, errors, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+	}
+
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	@ExceptionHandler(ConstraintViolationException.class)
+	public ResponseEntity<Object> handleContraintViolationException(ConstraintViolationException ex, WebRequest request) {
+
+		String mensagemUsuario = ex.getConstraintViolations().stream().map(ConstraintViolation::getMessage).collect(Collectors.toList()).toString();
+		String mensagemDesenvolvedor = ex.getMessage();
+
+		List<MensagemErro> errors = Arrays.asList(new MensagemErro(mensagemUsuario, mensagemDesenvolvedor));
+
+		return handleExceptionInternal(ex, errors, null, HttpStatus.NOT_FOUND, request);
+
 	}
 
 }
